@@ -65,12 +65,37 @@ function saveCustomer(req, response, result){
          }
     });
 }
+
+function saveAddress(req, response, result){
+    gateway.address.create({
+        customerId: result.customer.id,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        company: req.body.company,
+        streetAddress: req.body.addresses[0].streetAddress,
+        extendedAddress: req.body.addresses[0].extendedAddress,
+        locality: req.body.addresses[0].locality,
+        region: req.body.addresses[0].region,
+        postalCode: req.body.addresses[0].postalCode,
+        countryCodeAlpha2:'US'
+    }, function (err, result) {
+        console.log("Address Res = " + JSON.stringify(result))
+        if(err){
+            response.json({
+                status: "failed",
+                errorCode: "10001",
+                errorMessage: "Sorry OnBoarding  Failed"
+            });
+        }
+    });
+}
+
 function customerOnBoard(req, response){
     console.log("Customer OnBoarding Requested");
 
     console.log(JSON.stringify(req.body));
     
-    if(0 === req.body.lenght){
+    if(0 === req.body.length){
     	response.json(
         		{
                     status: "failed",
@@ -83,25 +108,16 @@ function customerOnBoard(req, response){
     gateway.customer.create({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        company: req.body.command,
+        company: req.body.company,
         email: req.body.email,
         phone: req.body.phone,
         fax: req.body.fax,
         website: req.body.website,
-        paymentMethodNonce: req.body.paymentMethodNonce,
-        addresses: [
-            {
-            	streetAddress: req.body.addresses[0].streetAddress,
-            	extendedAddress: req.body.addresses[0].extendedAddress,
-            	locality: req.body.addresses[0].locality,
-            	region: req.body.addresses[0].region,
-            	postalCode: req.body.addresses[0].postalCode,
-            	countryCodeAlpha2:req.body.addresses[0].countryCodeAlpha2
-            }
-        ]
+        paymentMethodNonce: req.body.paymentMethodNonce
     }, function(err, result){
 		console.log(JSON.stringify(result));
         if(true === result.success){
+            saveAddress(req, response, result);
             saveCustomer(req, response, result);
         }else{
             console.log("OnBoarding Failed");
@@ -113,7 +129,6 @@ function customerOnBoard(req, response){
         }
     });
 }
-
 
 function getCustomer(req, res){
     console.log("Get Address for customer id = " + req.params.customerId);

@@ -6,6 +6,7 @@
     "connect":"latest",
     "braintree":"latest",
     "body-parser":"latest",
-    "request":"latest"
+    "request":"latest",
+    "http":"latest"
   }
 }
