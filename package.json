@@ -1,0 +1,11 @@
+{
+  "name":"CustomerOnBoarding",
+  "main":"Onboarding.js",
+  "dependencies":{
+    "express":"latest",
+    "connect":"latest",
+    "braintree":"latest",
+    "body-parser":"latest",
+    "request":"latest"
+  }
+}
