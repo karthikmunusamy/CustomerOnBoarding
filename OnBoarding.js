@@ -14,6 +14,8 @@ var app = express();
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 
+var self = this;
+
 var gateway = brainTree.connect({
     environment: brainTree.Environment.Sandbox,
     merchantId: "5zhpcmf7vrg95mzb",
@@ -25,6 +27,44 @@ console.log("BrainTree connect success");
 var customerId;
 var status;
 
+function saveCustomer(req, response, result){
+
+    console.log("OnBoarding Success");
+    var resBody = {
+        status: "success",
+        result: result
+    };
+    var customerDB = {
+        'customer': {
+            'bt_customer_id': result.customer.id,
+            'payment_method_token': result.customer.paymentMethods[0].token
+        },
+        'device': {
+            'mac_id': req.body.macId,
+            'item_id': req.body.itemId,
+            'quantity': '1'
+        }
+    };
+
+    console.log("customerDB = " + JSON.stringify(customerDB));
+
+    request.post({
+        headers: {'content-type': 'application/json'},
+        url: 'http://10.101.1.180:8080/boat/onboarding/customer',
+        body: JSON.stringify(customerDB)
+    }, function(err, res, body){
+        if(err){
+            response.json({
+                status: "failed",
+                errorCode: "10001",
+                errorMessage: "Sorry OnBoarding  Failed"
+            });
+        }else{
+            console.log(JSON.stringify(resBody));
+            response.json(resBody);
+         }
+    });
+}
 function customerOnBoard(req, response){
     console.log("Customer OnBoarding Requested");
 
@@ -60,47 +100,9 @@ function customerOnBoard(req, response){
             }
         ]
     }, function(err, result){
-
-        if(true === result.success || err){
-            console.log("OnBoarding Success");
-            var resBody = {
-            		status: "success",
-            		result: result
-            		
-            };
-            console.log(JSON.stringify(resBody));
-            response.json(resBody);
-            var customerDB = {
-                'customer': {
-                    'bt_customer_id': result.customer.id,
-                    'payment_method_token': result.customer.paymentMethods[0].token
-                },
-                'device': {
-                    'mac_id': req.body.macId,
-                    'item_id': req.body.itemId,
-                    'quantity': '1'
-                }
-            };
-
-            console.log("customerDB = " + JSON.stringify(customerDB));
-
-            request.post({
-                headers: {'content-type': 'application/json'},
-                url: 'http://10.101.1.180:8080/boat/onboarding/customer',
-                body: JSON.stringify(customerDB)
-            }, function(err, res, body){
-                if(err){
-                	response.json({
-                        status: "failed",
-                        errorCode: "10001",
-                        errorMessage: "Sorry OnBoarding  Failed"
-                    });
-                }/*else{
-                	response.json({
-                        status: "success"
-                    });
-                }*/
-            });
+		console.log(JSON.stringify(result));
+        if(true === result.success){
+            saveCustomer(req, response, result);
         }else{
             console.log("OnBoarding Failed");
             response.json({
