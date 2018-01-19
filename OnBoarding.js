@@ -1,6 +1,4 @@
-/**
- * Created by kamunusamy on 10/24/2015.
- */
+
 
 var express = require('express');
 var http = require('http');
